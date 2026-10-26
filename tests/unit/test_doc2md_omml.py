@@ -71,3 +71,24 @@ def test_explicit_bar_position_is_preserved():
         "</m:bar></m:oMath>"
     )
     assert str(omml.oMath2Latex(etree.fromstring(xml))) == r"\underline{x}"
+
+
+@pytest.mark.parametrize(
+    ("base", "expected"),
+    [
+        ("min", r"\min_{n}"),
+        ("inf", r"\inf_{n}"),
+        ("sup", r"\sup_{n}"),
+        ("gcd", r"\gcd_{n}"),
+        ("foo", r"\underset{n}{foo}"),
+    ],
+)
+def test_limit_below_preserves_unsupported_base(base, expected):
+    omml = _load_omml()
+    xml = (
+        f'<m:oMath xmlns:m="{OMML_NS}"><m:limLow>'
+        f"<m:e><m:r><m:t>{base}</m:t></m:r></m:e>"
+        "<m:lim><m:r><m:t>n</m:t></m:r></m:lim>"
+        "</m:limLow></m:oMath>"
+    )
+    assert str(omml.oMath2Latex(etree.fromstring(xml))) == expected

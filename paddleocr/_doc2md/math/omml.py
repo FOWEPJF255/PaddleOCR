@@ -379,9 +379,10 @@ class oMath2Latex(Tag2Method):
         t_dict = self.process_children_dict(elm, include=("e", "lim"))
         latex_s = LIM_FUNC.get(t_dict["e"])
         if not latex_s:
-            raise RuntimeError("Not support lim {}".format(t_dict["e"]))
-        else:
-            return latex_s.format(lim=t_dict.get("lim"))
+            return r"\underset{{{lim}}}{{{text}}}".format(
+                lim=t_dict.get("lim"), text=t_dict["e"]
+            )
+        return latex_s.format(lim=t_dict.get("lim"))
 
     def do_limupp(self, elm):
         """
