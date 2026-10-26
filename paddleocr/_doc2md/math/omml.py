@@ -141,7 +141,7 @@ class Tag2Method:
 class Pr(Tag2Method):
     text = ""
 
-    __val_tags = ("chr", "pos", "begChr", "endChr", "type")
+    __val_tags = ("chr", "pos", "begChr", "endChr", "sepChr", "type")
 
     __innerdict = None  # can't use the __dict__
 
@@ -174,6 +174,7 @@ class Pr(Tag2Method):
         "pos": do_common,
         "begChr": do_common,
         "endChr": do_common,
+        "sepChr": do_common,
         "type": do_common,
     }
 
@@ -252,9 +253,12 @@ class oMath2Latex(Tag2Method):
         """
         the delimiter object
         """
-        c_dict = self.process_children_dict(elm)
-        pr = c_dict.get("dPr")
+        children = list(self.process_children_list(elm))
+        pr = next((text for stag, text, _ in children if stag == "dPr"), None)
         null = D_DEFAULT.get("null")
+        expressions = [text for stag, text, _ in children if stag == "e"]
+        separator = get_val(pr.sepChr if pr is not None else None, default=",")
+        separator = r"\middle|" if separator == "|" else escape_latex(separator)
 
         s_val = get_val(
             pr.begChr if pr is not None else None,
@@ -268,7 +272,7 @@ class oMath2Latex(Tag2Method):
         )
         delim = (pr.text if pr is not None else "") + D.format(
             left=null if not s_val else escape_latex(s_val),
-            text=c_dict["e"],
+            text=separator.join(expressions),
             right=null if not e_val else escape_latex(e_val),
         )
         return delim
